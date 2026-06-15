@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PTS - PLAKA TANIMA SİSTEMİ</string>
+    <string name="powered_by">Powered by KingSecurity © 2026</string>
+    <string name="app_description">PLAKA TANIMA SİSTEMİ - Şüpheli araç plakaları tespit eden akıllı sistem</string>
+    <string name="login_title">Giriş Yap</string>
+    <string name="register_title">Kayıt Ol</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Şifre</string>
+    <string name="confirm_password_hint">Şifre Tekrar</string>
+    <string name="admin_panel">Admin Panel</string>
+    <string name="start_scan">Taramaya Başla</string>
+    <string name="logout">Çıkış Yap</string>
+    <string name="about">Uygulama Hakkında</string>
+    <string name="biometric_title">Parmak İzi ile Giriş</string>
+    <string name="biometric_subtitle">Lütfen parmak izinizi okuyucuya dokundur</string>
+    <string name="retry">Tekrar Dene</string>
+    <string name="use_password">Şifre ile Giriş Yap</string>
+</resources>
