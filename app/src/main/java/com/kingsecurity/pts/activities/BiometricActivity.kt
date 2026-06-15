@@ -30,7 +30,7 @@ class BiometricActivity : AppCompatActivity() {
         setupBiometric()
         setupListeners()
 
-        // Auto-trigger biometric authentication
+        // Biometrik kimlik doğrulamasını otomatik başlat
         performBiometricAuthentication()
     }
 
@@ -126,6 +126,6 @@ class BiometricActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        // Don't allow back press from biometric screen
+        // Biometrik ekrandan geri dönüşe izin verme
     }
 }

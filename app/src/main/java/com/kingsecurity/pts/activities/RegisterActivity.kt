@@ -100,11 +100,13 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun saveUserToFirestore(userId: String, email: String) {
-        val userData = User(
-            userId = userId,
-            email = email,
-            isApproved = false,
-            createdAt = System.currentTimeMillis()
+        val userData = mapOf(
+            "userId" to userId,
+            "email" to email,
+            "isApproved" to false,
+            "isAdmin" to false,
+            "createdAt" to System.currentTimeMillis(),
+            "lastLogin" to System.currentTimeMillis()
         )
 
         firestore.collection("users").document(userId)

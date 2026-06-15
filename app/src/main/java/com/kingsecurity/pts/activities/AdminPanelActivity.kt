@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.kingsecurity.pts.adapters.SuspiciousPlateAdapter
 import com.kingsecurity.pts.databinding.ActivityAdminPanelBinding
 import com.kingsecurity.pts.models.SuspiciousPlate
 import kotlinx.coroutines.*
@@ -17,6 +18,7 @@ class AdminPanelActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
     private val scope = CoroutineScope(Dispatchers.Main + Job())
     private val plates = mutableListOf<SuspiciousPlate>()
+    private lateinit var adapter: SuspiciousPlateAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +28,7 @@ class AdminPanelActivity : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         setupUI()
+        setupAdapter()
         loadSuspiciousPlates()
     }
 
@@ -38,8 +41,15 @@ class AdminPanelActivity : AppCompatActivity() {
             showAddPlateDialog()
         }
 
-        // Setup RecyclerView
+        // RecyclerView kurulumu
         binding.platesRecyclerView.layoutManager = LinearLayoutManager(this)
+    }
+
+    private fun setupAdapter() {
+        adapter = SuspiciousPlateAdapter(plates) { plateId ->
+            deletePlate(plateId)
+        }
+        binding.platesRecyclerView.adapter = adapter
     }
 
     private fun loadSuspiciousPlates() {
@@ -54,14 +64,18 @@ class AdminPanelActivity : AppCompatActivity() {
 
                 plates.clear()
                 snapshots?.documents?.forEach { doc ->
-                    val plate = doc.toObject(SuspiciousPlate::class.java)
-                    if (plate != null) {
-                        plate.documentId = doc.id
-                        plates.add(plate)
-                    }
+                    val plate = SuspiciousPlate(
+                        plateNumber = doc.getString("plateNumber") ?: "",
+                        reason = doc.getString("reason") ?: "",
+                        createdAt = doc.getLong("createdAt") ?: 0L,
+                        createdBy = doc.getString("createdBy") ?: "",
+                        severity = doc.getString("severity") ?: "ORTA",
+                        documentId = doc.id
+                    )
+                    plates.add(plate)
                 }
 
-                // TODO: Setup adapter and update UI
+                adapter.notifyDataSetChanged()
                 binding.platesCountTextView.text = "Toplam: ${plates.size} plaka"
             }
     }
@@ -89,23 +103,23 @@ class AdminPanelActivity : AppCompatActivity() {
     }
 
     private fun addPlateToDatabase(plateNumber: String) {
-        val plate = SuspiciousPlate(
-            plateNumber = plateNumber,
-            reason = "Şüpheli araç",
-            createdAt = System.currentTimeMillis(),
-            createdBy = "admin"
+        val plateData = mapOf(
+            "plateNumber" to plateNumber,
+            "reason" to "Şüpheli araç",
+            "createdAt" to System.currentTimeMillis(),
+            "createdBy" to "admin123",
+            "severity" to "ORTA"
         )
 
         firestore.collection("suspicious_plates")
-            .add(plate)
+            .add(plateData)
             .addOnSuccessListener { docRef ->
                 Toast.makeText(
                     this,
                     "Plaka başarıyla eklendi",
                     Toast.LENGTH_SHORT
                 ).show()
-                // Refresh the list
-                loadSuspiciousPlates()
+                // Liste otomatik yenilenecek (snapshot listener)
             }
             .addOnFailureListener { e ->
                 Toast.makeText(
@@ -117,24 +131,33 @@ class AdminPanelActivity : AppCompatActivity() {
     }
 
     private fun deletePlate(plateId: String) {
-        firestore.collection("suspicious_plates")
-            .document(plateId)
-            .delete()
-            .addOnSuccessListener {
-                Toast.makeText(
-                    this,
-                    "Plaka silindi",
-                    Toast.LENGTH_SHORT
-                ).show()
-                loadSuspiciousPlates()
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Plakayı Sil")
+            .setMessage("Bu plakayı silmek istediğinize emin misiniz?")
+            .setPositiveButton("Evet") { _, _ ->
+                firestore.collection("suspicious_plates")
+                    .document(plateId)
+                    .delete()
+                    .addOnSuccessListener {
+                        Toast.makeText(
+                            this,
+                            "Plaka silindi",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        // Liste otomatik yenilenecek (snapshot listener)
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(
+                            this,
+                            "Silme hatası: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(
-                    this,
-                    "Silme hatası: ${e.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+            .setNegativeButton("Hayır") { dialog, _ ->
+                dialog.dismiss()
             }
+            .show()
     }
 
     override fun onDestroy() {

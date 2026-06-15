@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.kingsecurity.pts.R
 import com.kingsecurity.pts.databinding.ActivitySplashBinding
 import com.kingsecurity.pts.utils.SharedPrefHelper
 
@@ -14,7 +13,7 @@ class SplashActivity : AppCompatActivity() {
     
     private lateinit var binding: ActivitySplashBinding
     private lateinit var auth: FirebaseAuth
-    private val SPLASH_TIME_OUT: Long = 3000 // 3 seconds
+    private val SPLASH_TIME_OUT: Long = 3000 // 3 saniye
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,10 +22,10 @@ class SplashActivity : AppCompatActivity() {
         
         auth = FirebaseAuth.getInstance()
         
-        // Start logo animation
+        // Logo animasyonunu başlat
         binding.lottieAnimation.playAnimation()
         
-        // Navigate after splash screen
+        // Splash ekranından sonra sonraki ekrana git
         Handler(Looper.getMainLooper()).postDelayed({
             navigateToNextScreen()
         }, SPLASH_TIME_OUT)

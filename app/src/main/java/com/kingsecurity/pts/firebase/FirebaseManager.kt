@@ -18,10 +18,11 @@ class FirebaseManager {
                 .get()
                 .await()
             
-            val user = document.toObject(User::class.java)
-            user?.isApproved ?: false
+            val isApproved = document.getBoolean("isApproved") ?: false
+            Log.d("FirebaseManager", "Kullanıcı Onayı: $isApproved")
+            isApproved
         } catch (e: Exception) {
-            Log.e("FirebaseManager", "Error checking approval: ${e.message}")
+            Log.e("FirebaseManager", "Onay kontrol hatası: ${e.message}")
             false
         }
     }
@@ -34,9 +35,11 @@ class FirebaseManager {
             
             documents.mapNotNull { doc ->
                 doc.getString("plateNumber")
+            }.also { plates ->
+                Log.d("FirebaseManager", "Şüpheli Plakalar Yüklendi: ${plates.size}")
             }
         } catch (e: Exception) {
-            Log.e("FirebaseManager", "Error fetching plates: ${e.message}")
+            Log.e("FirebaseManager", "Plaka yükleme hatası: ${e.message}")
             emptyList()
         }
     }
@@ -45,7 +48,7 @@ class FirebaseManager {
         firestore.collection("suspicious_plates")
             .addSnapshotListener { snapshots, error ->
                 if (error != null) {
-                    Log.e("FirebaseManager", "Listen error: ${error.message}")
+                    Log.e("FirebaseManager", "Dinleme hatası: ${error.message}")
                     return@addSnapshotListener
                 }
 
@@ -53,6 +56,7 @@ class FirebaseManager {
                     doc.getString("plateNumber")
                 } ?: emptyList()
 
+                Log.d("FirebaseManager", "Gerçek Zamanl Plakalar Güncelleştirildi: ${plates.size}")
                 callback(plates)
             }
     }

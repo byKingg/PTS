@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.kingsecurity.pts.databinding.ItemSuspiciousPlateBinding
 import com.kingsecurity.pts.models.SuspiciousPlate
+import java.text.SimpleDateFormat
+import java.util.*
 
 class SuspiciousPlateAdapter(
     private val plates: List<SuspiciousPlate>,
@@ -19,6 +21,11 @@ class SuspiciousPlateAdapter(
                 plateNumberTextView.text = plate.plateNumber
                 reasonTextView.text = plate.reason
                 severityTextView.text = "Seviye: ${plate.severity}"
+                
+                // Tarihi formatla
+                val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale("tr", "TR"))
+                val date = sdf.format(Date(plate.createdAt))
+                createdByTextView.text = "${plate.createdBy} - $date"
                 
                 deleteButton.setOnClickListener {
                     onDeleteClick(plate.documentId)

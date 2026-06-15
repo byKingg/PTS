@@ -5,14 +5,18 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.kingsecurity.pts.databinding.ActivityLoginBinding
 import com.kingsecurity.pts.utils.SharedPrefHelper
+import kotlinx.coroutines.*
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
     private lateinit var sharedPref: SharedPrefHelper
+    private val scope = CoroutineScope(Dispatchers.Main + Job())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +24,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
         sharedPref = SharedPrefHelper(this)
 
         setupListeners()
@@ -74,8 +79,7 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
-                        // Check if user is approved by admin
-                        checkUserApprovalStatus(user.uid)
+                        checkUserApprovalStatus(user.uid, email)
                     }
                 } else {
                     Toast.makeText(
@@ -87,18 +91,63 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    private fun checkUserApprovalStatus(userId: String) {
-        // TODO: Check in Firestore if user is approved
-        // For now, assume approved and navigate
-        sharedPref.setUserEmail(auth.currentUser?.email ?: "")
-        sharedPref.setBiometricEnabled(false)
-        
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
+    private fun checkUserApprovalStatus(userId: String, email: String) {
+        scope.launch {
+            try {
+                val document = firestore.collection("users")
+                    .document(userId)
+                    .get()
+                    .addOnSuccessListener { doc ->
+                        val isApproved = doc.getBoolean("isApproved") ?: false
+                        val isAdmin = doc.getBoolean("isAdmin") ?: false
+                        
+                        if (isApproved) {
+                            sharedPref.setUserEmail(email)
+                            sharedPref.setUserId(userId)
+                            sharedPref.setIsAdmin(isAdmin)
+                            sharedPref.setBiometricEnabled(false)
+                            
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Hoş geldiniz!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            
+                            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                            finish()
+                        } else {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Hesabınız henüz onaylanmamıştır. Lütfen admin onayını bekleyin.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            auth.signOut()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Kontrol hatası: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@LoginActivity,
+                    "Hata: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
         finishAffinity()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 }

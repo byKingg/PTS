@@ -42,9 +42,18 @@
                 android:id="@+id/severityTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Seviye: MEDIUM"
+                android:text="Seviye: ORTA"
                 android:textSize="12sp"
-                android:textColor="@color/accent_color" />
+                android:textColor="@color/accent_color"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/createdByTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="admin123 - 15.06.2026 22:03"
+                android:textSize="10sp"
+                android:textColor="@color/text_secondary" />
 
         </LinearLayout>
 

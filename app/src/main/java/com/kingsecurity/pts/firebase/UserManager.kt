@@ -1,8 +1,8 @@
 package com.kingsecurity.pts.firebase
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.kingsecurity.pts.models.User
 import kotlinx.coroutines.tasks.await
 
 class UserManager {
@@ -15,8 +15,9 @@ class UserManager {
                 .document(userId)
                 .update("lastLogin", System.currentTimeMillis())
                 .await()
+            Log.d("UserManager", "Son Giriş Zamanı Güncellendi")
         } catch (e: Exception) {
-            // Handle error
+            Log.e("UserManager", "Güncelleme hatası: ${e.message}")
         }
     }
 
@@ -27,9 +28,11 @@ class UserManager {
                 .get()
                 .await()
             
-            val user = document.toObject(User::class.java)
-            user?.isAdmin ?: false
+            val isAdmin = document.getBoolean("isAdmin") ?: false
+            Log.d("UserManager", "Admin Kontrolü: $isAdmin")
+            isAdmin
         } catch (e: Exception) {
+            Log.e("UserManager", "Admin kontrol hatası: ${e.message}")
             false
         }
     }
@@ -40,5 +43,6 @@ class UserManager {
     
     fun logout() {
         auth.signOut()
+        Log.d("UserManager", "Kullanıcı Çıkış Yaptı")
     }
 }

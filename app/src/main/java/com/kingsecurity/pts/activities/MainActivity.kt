@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -13,7 +12,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.kingsecurity.pts.databinding.ActivityMainBinding
-import com.kingsecurity.pts.utils.Constants
 import com.kingsecurity.pts.utils.SharedPrefHelper
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -41,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        binding.userEmailTextView.text = auth.currentUser?.email ?: "Unknown"
+        binding.userEmailTextView.text = auth.currentUser?.email ?: "Bilinmeyen"
     }
 
     private fun setupListeners() {
@@ -54,7 +52,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.adminPanelButton.setOnClickListener {
-            startActivity(Intent(this, AdminPanelActivity::class.java))
+            val isAdmin = sharedPref.getIsAdmin()
+            if (isAdmin) {
+                startActivity(Intent(this, AdminPanelActivity::class.java))
+            } else {
+                Toast.makeText(this, "Admin paneline erişim yetkiniz yok!", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.scanButton.setOnClickListener {
@@ -108,8 +111,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun startScanning() {
         binding.scanButton.isEnabled = false
-        // TODO: Implement YOLO detection logic
         Toast.makeText(this, "Tarama başladı...", Toast.LENGTH_SHORT).show()
+        // TODO: YOLO tespit mantığı eklenecek
         binding.scanButton.isEnabled = true
     }
 

@@ -10,12 +10,9 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
-import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import com.kingsecurity.pts.models.DetectionResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 class PlateDetectionManager(private val context: Context) {
     
@@ -32,9 +29,9 @@ class PlateDetectionManager(private val context: Context) {
         try {
             val modelBuffer = FileUtil.loadMappedFile(context, "yolov8n.tflite")
             interpreter = Interpreter(modelBuffer)
-            Log.d("PlateDetection", "YOLO model loaded successfully")
+            Log.d("PlateDetection", "YOLO modeli başarıyla yüklendi")
         } catch (e: Exception) {
-            Log.e("PlateDetection", "Error loading model: ${e.message}")
+            Log.e("PlateDetection", "Model yükleme hatası: ${e.message}")
         }
     }
     
@@ -42,7 +39,7 @@ class PlateDetectionManager(private val context: Context) {
         firestore.collection("suspicious_plates")
             .addSnapshotListener { snapshots, error ->
                 if (error != null) {
-                    Log.e("PlateDetection", "Error loading plates: ${error.message}")
+                    Log.e("PlateDetection", "Plaka yükleme hatası: ${error.message}")
                     return@addSnapshotListener
                 }
                 
@@ -50,23 +47,23 @@ class PlateDetectionManager(private val context: Context) {
                     doc.getString("plateNumber")
                 } ?: emptyList()
                 
-                Log.d("PlateDetection", "Loaded ${suspiciousPlates.size} suspicious plates")
+                Log.d("PlateDetection", "${suspiciousPlates.size} şüpheli plaka yüklendi")
             }
     }
     
     suspend fun detectPlate(bitmap: Bitmap, userId: String): DetectionResult = withContext(Dispatchers.Default) {
         if (interpreter == null) {
             return@withContext DetectionResult(
-                plateNumber = "ERROR",
+                plateNumber = "HATA",
                 confidence = 0f,
                 timestamp = System.currentTimeMillis(),
-                detectedBy = userId,
+                userId = userId,
                 isSuspicious = false
             )
         }
         
         try {
-            // Preprocess the image
+            // Görüntüyü ön işle
             val imageProcessor = ImageProcessor.Builder()
                 .add(ResizeOp(640, 640, ResizeOp.ResizeMethod.BILINEAR))
                 .add(NormalizeOp(0f, 255f))
@@ -76,15 +73,15 @@ class PlateDetectionManager(private val context: Context) {
             tensorImage.load(bitmap)
             tensorImage = imageProcessor.process(tensorImage)
             
-            // Run inference
+            // Modelı çalıştır
             val output = Array(1) { FloatArray(8400) }
             interpreter?.run(tensorImage.buffer, output)
             
-            // Post-process results
+            // Sonuçları işle
             val detectionResult = postProcessResults(output[0], userId)
             
-            // Check if detected plate is suspicious
-            if (detectionResult.plateNumber != "NO_DETECTION") {
+            // Tespit edilen plaka şüpheli mi kontrol et
+            if (detectionResult.plateNumber != "TESPİT_BULUNAMADI") {
                 detectionResult.isSuspicious = suspiciousPlates.any { suspiciousPlate ->
                     detectionResult.plateNumber.contains(suspiciousPlate, ignoreCase = true)
                 }
@@ -92,12 +89,12 @@ class PlateDetectionManager(private val context: Context) {
             
             detectionResult
         } catch (e: Exception) {
-            Log.e("PlateDetection", "Error during inference: ${e.message}")
+            Log.e("PlateDetection", "Çıkarsama hatası: ${e.message}")
             DetectionResult(
-                plateNumber = "ERROR",
+                plateNumber = "HATA",
                 confidence = 0f,
                 timestamp = System.currentTimeMillis(),
-                detectedBy = userId,
+                userId = userId,
                 isSuspicious = false
             )
         }
@@ -105,17 +102,17 @@ class PlateDetectionManager(private val context: Context) {
     
     private fun postProcessResults(output: FloatArray, userId: String): DetectionResult {
         var maxConfidence = 0f
-        var bestPlateNumber = "NO_DETECTION"
+        var bestPlateNumber = "TESPİT_BULUNAMADI"
         
-        // Process YOLO output (simplified)
+        // YOLO çıkışını işle (basitleştirilmiş)
         for (i in 0 until output.size step 85) {
             if (i + 4 < output.size) {
                 val confidence = output[i + 4]
                 
                 if (confidence > 0.5f && confidence > maxConfidence) {
                     maxConfidence = confidence
-                    // Extract plate number from model output
-                    // This is a placeholder - actual implementation depends on your YOLO training
+                    // Modelden plaka numarasını çıkart
+                    // Bu bir yer tutucu - gerçek uygulama YOLO eğitim ayarlarına bağlıdır
                     bestPlateNumber = "34ABC${(1000..9999).random()}"
                 }
             }
@@ -125,9 +122,9 @@ class PlateDetectionManager(private val context: Context) {
             plateNumber = bestPlateNumber,
             confidence = maxConfidence,
             timestamp = System.currentTimeMillis(),
-            detectedBy = userId,
+            userId = userId,
             isSuspicious = false,
-            location = "Camera Feed"
+            location = "Kamera Akışı"
         )
     }
     
@@ -145,18 +142,19 @@ class PlateDetectionManager(private val context: Context) {
             firestore.collection("detections")
                 .add(detectionData)
                 .addOnSuccessListener {
-                    Log.d("PlateDetection", "Detection saved: ${detection.plateNumber}")
+                    Log.d("PlateDetection", "Tespit kaydedildi: ${detection.plateNumber}")
                 }
                 .addOnFailureListener { e ->
-                    Log.e("PlateDetection", "Error saving detection: ${e.message}")
+                    Log.e("PlateDetection", "Tespit kaydetme hatası: ${e.message}")
                 }
         } catch (e: Exception) {
-            Log.e("PlateDetection", "Error: ${e.message}")
+            Log.e("PlateDetection", "Hata: ${e.message}")
         }
     }
     
     fun release() {
         interpreter?.close()
         interpreter = null
+        Log.d("PlateDetection", "Kaynaklar serbest bırakıldı")
     }
 }

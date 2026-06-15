@@ -7,38 +7,61 @@ class SharedPrefHelper(context: Context) {
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences("PTS_PREFS", Context.MODE_PRIVATE)
 
+    // Kullanıcı Email
     fun setUserEmail(email: String) {
-        sharedPreferences.edit().putString("USER_EMAIL", email).apply()
+        sharedPreferences.edit().putString("KULLANICI_EMAIL", email).apply()
     }
 
     fun getUserEmail(): String {
-        return sharedPreferences.getString("USER_EMAIL", "") ?: ""
+        return sharedPreferences.getString("KULLANICI_EMAIL", "") ?: ""
     }
 
+    // Biometrik Etkinleştirme
     fun setBiometricEnabled(enabled: Boolean) {
-        sharedPreferences.edit().putBoolean("BIOMETRIC_ENABLED", enabled).apply()
+        sharedPreferences.edit().putBoolean("BIOMETRIK_ETKIN", enabled).apply()
     }
 
     fun getBiometricEnabled(): Boolean {
-        return sharedPreferences.getBoolean("BIOMETRIC_ENABLED", false)
+        return sharedPreferences.getBoolean("BIOMETRIK_ETKIN", false)
     }
 
+    // Son Aktivite Zamanı
     fun setLastActivityTime(time: Long) {
-        sharedPreferences.edit().putLong("LAST_ACTIVITY_TIME", time).apply()
+        sharedPreferences.edit().putLong("SON_AKTIVITE_ZAMANI", time).apply()
     }
 
     fun getLastActivityTime(): Long {
-        return sharedPreferences.getLong("LAST_ACTIVITY_TIME", 0L)
+        return sharedPreferences.getLong("SON_AKTIVITE_ZAMANI", 0L)
     }
 
+    // İnaktivite Zaman Aşımı
     fun setInactivityTimeout(timeout: Long) {
-        sharedPreferences.edit().putLong("INACTIVITY_TIMEOUT", timeout).apply()
+        sharedPreferences.edit().putLong("INAKTIVITE_TIMEOUT", timeout).apply()
     }
 
     fun getInactivityTimeout(): Long {
-        return sharedPreferences.getLong("INACTIVITY_TIMEOUT", 5 * 60 * 1000) // 5 minutes default
+        return sharedPreferences.getLong("INAKTIVITE_TIMEOUT", 5 * 60 * 1000) // 5 dakika varsayılan
     }
 
+    // Kullanıcı ID
+    fun setUserId(userId: String) {
+        sharedPreferences.edit().putString("KULLANICI_ID", userId).apply()
+    }
+
+    fun getUserId(): String {
+        return sharedPreferences.getString("KULLANICI_ID", "") ?: ""
+    }
+
+    // Admin Durumu
+    fun setIsAdmin(isAdmin: Boolean) {
+        sharedPreferences.edit().putBoolean("YONETICI_MI", isAdmin).apply()
+    }
+
+    fun getIsAdmin(): Boolean {
+        return sharedPreferences.getBoolean("YONETICI_MI", false)
+    }
+
+    // Tüm Verileri Temizle
     fun clearAll() {
         sharedPreferences.edit().clear().apply()
     }
