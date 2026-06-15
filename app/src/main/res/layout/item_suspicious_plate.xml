@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@color/white"
+    android:layout_margin="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/plateNumberTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="34ABC1234"
+                android:textSize="16sp"
+                android:textColor="@color/text_primary"
+                android:fontFamily="@font/roboto_bold"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/reasonTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Şüpheli araç"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/severityTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Seviye: MEDIUM"
+                android:textSize="12sp"
+                android:textColor="@color/accent_color" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sil"
+            android:backgroundTint="@color/error_color"
+            android:textColor="@color/white"
+            android:padding="8dp"
+            android:layout_marginStart="12dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

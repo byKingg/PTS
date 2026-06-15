@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kingsecurity.pts">
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PTS">
+
+        <!-- Splash Activity -->
+        <activity
+            android:name=".activities.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.PTS.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Login Activity -->
+        <activity
+            android:name=".activities.LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PTS.NoActionBar" />
+
+        <!-- Register Activity -->
+        <activity
+            android:name=".activities.RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PTS.NoActionBar" />
+
+        <!-- Main Camera Activity -->
+        <activity
+            android:name=".activities.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PTS.NoActionBar" />
+
+        <!-- Biometric Activity -->
+        <activity
+            android:name=".activities.BiometricActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PTS.NoActionBar" />
+
+        <!-- Admin Panel Activity -->
+        <activity
+            android:name=".activities.AdminPanelActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PTS.NoActionBar" />
+
+    </application>
+
+</manifest>
